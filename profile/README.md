@@ -32,29 +32,47 @@ Applications have been written to colocate the non-boilerplate code as much as p
 
 Heavy frameworks have been avoided and any database interaction is presented in raw SQL for maximum clarity.
 
-## Getting Started
-
 ## System Overview
-This demo describes a simple architecture that has two backend services.
+The demo architecture is a basic messaging application in which two users can exchange messages. A user will receive notifications about new messages. The functionality is similar to that of a simplified LinkedIn messaging.
+
+There are two backend services, [`notifier`](https://github.com/microservices-march-2022/notifier) and [`messenger`](https://github.com/microservices-march-2022/messenger).
+
+Each service has its own postgres database.
+
+There is a single RabbitMQ message queue that any service can use. It is defined in the [`platform`](https://github.com/microservices-march-2022/platform) repository.
+
 | Service     | Role                                                                                                                                    |
 |-------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| `messenger` | * Provides the HTTP interface for sending and receiving messages used both by programmatic access and an eventual UI. * Stores messages |
-| `notifier`  | * Listens for `new_message` events on the message queue * Stores user notification preferences * Dispatches notifications               |
+| `messenger` | Provides the HTTP interface for sending and receiving messages used both by programmatic access and an eventual UI. Stores messages |
+| `notifier`  | Listens for `new_message` events on the message queue. Stores user notification preferences Dispatches notifications               |
 
+| Infrastructure Element     | Role                                                                                                                                    |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| RabbitMQ | Serves as a message broker for the whole system.  Services may broadcast events and other services that care about that information can consume those messages and act accordingly. |
+| NGINX | Routes HTTP traffic from outside the system to the correct service |
+
+### System Diagram
 ```mermaid
 graph TD
 G --> A
 subgraph System
 A[NGINX] -->|send message| B[messenger]
 B -->|message content| C[(messenger)]
-B -->|new_message| D[/RabbitMQ/]
-D -->|new_message| E[Notifier]
+B .->|new_message| D[/RabbitMQ/]
+D .->|new_message| E[notifier]
 E <-->|notification preferences| F[(notifier)]
 end
 E -->|notification based on preferences| H
 subgraph Users
-G(User A) ---|In a conversation| H(User B)
+G(user_a) ---|In a conversation| H(user_b)
 end
-
-
 ```
+The above diagram illustrates the following basic flow:
+Given that `user_a` and `user_b` are in a `conversation` together
+1. `user_a` sends a message to `user_b`
+1. The message is routed to the `notifier` service by the `nginx` load balancer
+1. The message is saved in the database
+1. The `messenger` service produces the `new_message` event to `RabbitMQ`
+1. The `notifier` service, which is consuming from `RabbitMQ` processes the `new_message` event
+1. The `notifier service checks its database to find the notification preferences for `user_b`
+1. The `notifier` service dispatches the notification about the new message `user_b` (shown via logs from `notifier`)
