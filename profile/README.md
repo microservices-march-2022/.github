@@ -7,6 +7,13 @@ This demo architecture is NOT meant to be an example of a production-ready appli
 
 Reasons for the inclusion of tooling, or of decisions made around common issues shall be described in terms of the decisionmaking criteria behind them and the core problems that are being solved. Through study of this demo, one should be able to make decisions about their own architecture rather than copying patterns blindly.
 
+erDiagram
+CUSTOMER ||--o{ ORDER : places
+ORDER ||--|{ LINE-ITEM : contains
+CUSTOMER }|..|{ DELIVERY-ADDRESS : uses
+
+
+
 ### Simplicity
 This demo does not use any complex container orchestration systems such as Kubernetes or Nomad - nor does it use other supporting frameworks like service meshes.
 
