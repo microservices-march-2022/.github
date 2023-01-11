@@ -1,6 +1,9 @@
 # Microservices March Demo Architecture
 This is the work-in-progress demo architecture for an event. The system is a simple chat system in which each "conversation" has two users (think LinkedIn messages).
 
+## Running the Architecture
+We suggest you read and understand this document before continuing. Start up instructions can be found in the [`platform` repository README](https://github.com/microservices-march-2022/platform)
+
 ## Goals
 * Be understandable to learners of various backgrounds and experience levels
 * Show common microservices concepts using a very simple approach
@@ -49,14 +52,14 @@ There is a single RabbitMQ message queue that any service can use. It is defined
 | Infrastructure Element     | Role                                                                                                                                    |
 |-------------|-----------------------------------------------------------------------------------------------------------------------------------------|
 | RabbitMQ | Serves as a message broker for the whole system.  Services may broadcast events and other services that care about that information can consume those messages and act accordingly. |
-| NGINX | Routes HTTP traffic from outside the system to the correct service |
+| NGINX [PENDING] | Routes HTTP traffic from outside the system to the correct service |
 
 ### System Diagram
 ```mermaid
 graph TD
 G --> A
 subgraph System
-A[NGINX] -->|send message| B[messenger]
+A["NGINX [PENDING]"] -->|send message| B[messenger]
 B -->|message content| C[(messenger)]
 B .->|new_message| D[/RabbitMQ/]
 D .->|new_message| E[notifier]
@@ -70,7 +73,7 @@ end
 The above diagram illustrates the following basic flow:
 Given that `user_a` and `user_b` are in a `conversation` together
 1. `user_a` sends a message to `user_b`
-1. The message is routed to the `notifier` service by the `nginx` load balancer
+1. The message is routed to the `notifier` service by the `nginx` load balancer [PENDING]
 1. The message is saved in the database
 1. The `messenger` service produces the `new_message` event to `RabbitMQ`
 1. The `notifier` service, which is consuming from `RabbitMQ` processes the `new_message` event
