@@ -2,6 +2,11 @@
 
 This is a continuosly evolving demo architecture for the annual Microservices March NGINX event. The architecture consists of a simple chat system in which each "conversation" has two users (think LinkedIn messages).
 
+## Microservices March 2023
+The Microservices March 2023 event has finished.  You can view the materials which include video and text-based tutorials at [this link](https://www.nginx.com/c/microservices-march-2023-agenda/).  All of the tutorials use tag `v1` as a base, although some start from other branches but it will be noted in the lab guides.
+
+The instruqt-based interactive labs are no longer available.
+
 ## Running the Architecture
 
 We suggest you read and understand this document before continuing. Start up instructions can be found in the [`platform` repository README](https://github.com/microservices-march/platform).
